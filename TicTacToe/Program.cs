@@ -17,9 +17,9 @@ namespace TicTacToe
 
             //Create two boards - with starting and with current fields
             char[,] startBoard = {
-                { '1', '2', '3' },
+                { '7', '8', '9' },
                 { '4', '5', '6' },
-                { '7', '8', '9' }
+                { '1', '2', '3' }
             };
             char[,] gameBoard = startBoard.Clone() as char[,];
 
