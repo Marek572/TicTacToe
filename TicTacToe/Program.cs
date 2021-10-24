@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;                                                             // for Thread.Sleep
 
 namespace TicTacToe
 {
@@ -33,6 +34,7 @@ namespace TicTacToe
             {
                 Console.Clear();
                 Draw(gameBoard);
+
                 if (player1Move)
                 {
                     Console.WriteLine(p1.Name + " turn");
@@ -48,13 +50,23 @@ namespace TicTacToe
                 if (gameEnded)
                     break;
             }
+
             ////////////////////////////////////////////////////////////////////////////////
 
             // End the game
             Console.Clear();
             Draw(gameBoard);
-            Console.Write("Game ended! ");
-            // TODO: print who won
+            Console.WriteLine("Game ended! ");
+            if (gameEnded)
+            {
+                Console.Write("Winner: ");
+                if(player1Move)
+                    Console.WriteLine(p2.Name);
+                else
+                    Console.WriteLine(p1.Name);
+            }
+            else
+                Console.WriteLine("A tie.");
         }
         
         /******************************************************************/
@@ -118,17 +130,37 @@ namespace TicTacToe
             //Check diagonals
             int diagSumA = 0;
             int diagSumB = 0;
-            for(int k = 0; k < ; k++)
+            for (int k = 0; k < width; k++)
             {
-                if (gameBoard[k,k] == Symbol)
+                if (gameBoard[k, k] == Symbol)
                     diagSumA++;
-                if (gameBoard[k, width -1 - k] == Symbol)
+                if (gameBoard[k, width - 1 - k] == Symbol)
                     diagSumB++;
             }
-            if(diagSumA == width || diagSumB == width)
+            if (diagSumA == width || diagSumB == width)
                 return true;                                        //ends the method
 
             //Otherwise, no win yet
+            return false;
+        }
+
+        public bool PlaceSymbol(char c, char[,] startBoard, char[,] gameBoard)
+        {
+            int height = gameBoard.GetLength(0);
+            int width = gameBoard.GetLength(1);
+            if (height != startBoard.GetLength(0) || width != startBoard.GetLength(1))
+                throw new Exception("The boards have different sizes!");
+
+            //Try to put player's symbol at a given place, if the place is available
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                    if ((gameBoard[i, j] == c) && (gameBoard[i, j] == startBoard[i, j]))
+                    {
+                        gameBoard[i, j] = Symbol;
+                        return true;
+                    }
+
+            // Otherwise, return withouth success
             return false;
         }
     }
@@ -137,7 +169,15 @@ namespace TicTacToe
     {
         public bool MakeMove(char[,] startBoard, char[,] gameBoard)
         {
-            //TODO: human move
+            //Ask human player to enter a place until (s)he picks an available one
+            char chosenPlace;
+            do
+            {
+                Console.Write("Choose an empty place: ");
+                chosenPlace = Console.ReadKey().KeyChar;
+                Console.WriteLine();
+            }
+            while (!PlaceSymbol(chosenPlace, startBoard, gameBoard));
             return CheckIfPlayerWon(gameBoard);
         }
     }
@@ -146,8 +186,20 @@ namespace TicTacToe
     {
         public bool MakeMove(char[,] startBoard, char[,] gameBoard)
         {
-            //TODO: computer move
+            // Draw random numbers until AI player picks an available one
+            Random rnd = new Random();
+            char chosenPlace;
+            do
+            {
+                int p = rnd.Next(1, gameBoard.Length + 1);                              //random 1-9
+                chosenPlace = p.ToString()[0];                                          //convert digit to char
+            }
+            while (!PlaceSymbol(chosenPlace, startBoard, gameBoard));
+
+            Thread.Sleep(2000);                                                         //wait 2 seconds
+
             return CheckIfPlayerWon(gameBoard);
         }
     }
 }
+
